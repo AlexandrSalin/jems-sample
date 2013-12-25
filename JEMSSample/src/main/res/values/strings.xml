@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">JEMSSample</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Show popup activity</string>
+    <string name="str_finish">Finish all</string>
+    <string name="str_stub">stub</string>
+    <string name="str_ac_main">Main activity</string>
+    <string name="str_ac_popup">Popup activity activity</string>
+    <string name="str_start">Start</string>
+
+</resources>

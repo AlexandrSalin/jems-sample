@@ -1,0 +1,75 @@
+buildscript {
+    repositories {
+        maven { url 'http://download.crashlytics.com/maven' }
+    }
+
+    dependencies {
+        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
+    }
+}
+apply plugin: 'android'
+apply plugin: 'crashlytics'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+    maven { url 'http://download.crashlytics.com/maven' }
+
+}
+
+configurations {
+    apt
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19"
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 19
+    }
+}
+
+dependencies {
+	compile 'com.android.support:support-v4:19.+'
+	compile 'com.android.support:appcompat-v7:19.+'
+
+    compile project(':libs:jems')
+
+    def androidAnnotationsVer = '3.0-SNAPSHOT'
+    apt "org.androidannotations:androidannotations:$androidAnnotationsVer"
+    compile "org.androidannotations:androidannotations-api:$androidAnnotationsVer"
+    compile 'com.crashlytics.android:crashlytics:1.+'
+
+}
+
+//Generation of AndroidAnnotations
+def getSourceSetName(variant) {
+    return new File(variant.dirName).getName();
+}
+
+android.applicationVariants.all { variant ->
+    def aptOutputDir = project.file("build/source/apt")
+    def aptOutput = new File(aptOutputDir, variant.dirName)
+
+    android.sourceSets[getSourceSetName(variant)].java.srcDirs += aptOutput.getPath()
+
+    variant.javaCompile.options.compilerArgs += [
+            '-processorpath', configurations.apt.getAsPath(),
+            '-AandroidManifestFile=' + variant.processResources.manifestFile,
+            '-AresourcePackageName=by.salin.apps.jems.sample',
+            '-s', aptOutput
+    ]
+
+    variant.javaCompile.source = variant.javaCompile.source.filter { p ->
+        return !p.getPath().startsWith(aptOutputDir.getPath())
+    }
+
+    variant.javaCompile.doFirst {
+        aptOutput.mkdirs()
+    }
+}
